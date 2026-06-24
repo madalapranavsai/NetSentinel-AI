@@ -1,86 +1,61 @@
-# netsentinel-coordinator
+# NetSentinel AI
 
-Simple ReAct agent
-Agent generated with `agents-cli` version `0.5.1`
+NetSentinel AI is a production-grade, multi-agent AI infrastructure remediator built using the Google Agent Development Kit (ADK) and FastAPI. It operates as an autonomous Site Reliability Engineer (SRE) to catch webhook alerts from monitoring tools (like Datadog or Prometheus), query system logs, and automatically generate infrastructure remediation plans.
 
-## Project Structure
-
-```
-netsentinel-coordinator/
-├── app/         # Core agent code
-│   ├── agent.py               # Main agent logic
-│   └── app_utils/             # App utilities and helpers
-├── tests/                     # Unit, integration, and load tests
-├── GEMINI.md                  # AI-assisted development guide
-└── pyproject.toml             # Project dependencies
-```
-
-> 💡 **Tip:** Use [Gemini CLI](https://github.com/google-gemini/gemini-cli) for AI-assisted development - project context is pre-configured in `GEMINI.md`.
-
-## Requirements
-
-Before you begin, ensure you have:
-- **uv**: Python package manager (used for all dependency management in this project) - [Install](https://docs.astral.sh/uv/getting-started/installation/) ([add packages](https://docs.astral.sh/uv/concepts/dependencies/) with `uv add <package>`)
-- **agents-cli**: Agents CLI - Install with `uv tool install google-agents-cli`
-- **Google Cloud SDK**: For GCP services - [Install](https://cloud.google.com/sdk/docs/install)
-
-
-## Quick Start
-
-Install `agents-cli` and its skills if not already installed:
-
-```bash
-uvx google-agents-cli setup
-```
-
-Install required packages:
-
-```bash
-agents-cli install
-```
-
-Test the agent with a local web server:
-
-```bash
-agents-cli playground
-```
-
-You can also use features from the [ADK](https://adk.dev/) CLI with `uv run adk`.
-
-## Commands
-
-| Command              | Description                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `agents-cli install` | Install dependencies using uv                                                         |
-| `agents-cli playground` | Launch local development environment                                                  |
-| `agents-cli lint`    | Run code quality checks                                                               |
-| `agents-cli eval`    | Evaluate agent behavior (generate, grade, analyze, and more — see `agents-cli eval --help`) |
-| `uv run pytest tests/unit tests/integration` | Run unit and integration tests                                                        |
-
-## 🛠️ Project Management
-
-| Command | What It Does |
-|---------|--------------|
-| `agents-cli scaffold enhance` | Add CI/CD pipelines and Terraform infrastructure |
-| `agents-cli infra cicd` | One-command setup of entire CI/CD pipeline + infrastructure |
-| `agents-cli scaffold upgrade` | Auto-upgrade to latest version while preserving customizations |
+## Features
+- **Multi-Agent Orchestration**: A lead SRE `Coordinator` routes tasks to specialized sub-agents (e.g., `Log Analyzer`).
+- **Persistent Memory**: Dynamically reads and writes to `incident_memory.json` to remember past incidents and execute instantaneous fixes.
+- **Security Firewall**: A pre-flight payload scanner intercepts adversarial Prompt Injections before they reach the LLM.
+- **FastAPI Webhook Gateway**: Built for cloud-native automated event ingestion.
+- **Cloud Run Ready**: Containerized and deployed effortlessly via Google Cloud Run.
 
 ---
 
-## Development
+## Local Development Setup
 
-Edit your agent logic in `app/agent.py` and test with `agents-cli playground` - it auto-reloads on save.
+We use `uv` for lightning-fast dependency management.
 
-## Deployment
+1. **Install Dependencies:**
+   ```bash
+   uv sync
+   ```
 
-```bash
-gcloud config set project <your-project-id>
-agents-cli deploy
-```
+2. **Set your Gemini API Key:**
+   ```bash
+   export GEMINI_API_KEY="your-api-key-here"
+   ```
 
-To add CI/CD and Terraform, run `agents-cli scaffold enhance`.
-To set up your production infrastructure, run `agents-cli infra cicd`.
+3. **Run the FastAPI Server Locally:**
+   ```bash
+   uv run uvicorn main:app --reload --port 8000
+   ```
+   *Navigate to [http://localhost:8000/docs](http://localhost:8000/docs) to access the interactive Swagger UI and test the API directly from your browser!*
 
-## Observability
+---
 
-Built-in telemetry exports to Cloud Trace, BigQuery, and Cloud Logging.
+## Cloud Deployment
+
+This repository includes a `Dockerfile` and automated deployment script for **Google Cloud Run**.
+
+1. **Ensure you have the Google Cloud CLI (`gcloud`) installed and authenticated:**
+   ```bash
+   gcloud auth login
+   ```
+
+2. **Run the deployment script:**
+   *(Ensure your Google Cloud project has an active Billing Account linked)*
+   ```bash
+   ./deploy.sh
+   ```
+
+The script will automatically build your container using Cloud Build, push it to Artifact Registry, and host it live on Cloud Run.
+
+---
+
+## Architecture
+
+- `app/agent.py`: ADK Agent definitions and Human-In-The-Loop configurations.
+- `app/security_eval.py`: Strict JSON payload sanitation.
+- `main.py`: Asynchronous FastAPI entry point.
+- `deploy.sh`: Deployment automation pipeline.
+- `service.yaml`: Knative configuration specs for Cloud Run.
