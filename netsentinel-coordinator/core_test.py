@@ -40,13 +40,17 @@ async def main():
         
         new_message = types.Content(role="user", parts=[types.Part.from_text(text=prompt)])
         
+        print("\n--- Event Stream ---")
         async for event in runner.run_async(user_id="test_user", session_id="test_session", new_message=new_message):
-            if hasattr(event, "text") and event.text:
-                print(event.text)
-            elif hasattr(event, "content") and event.content:
-                print(event.content)
+            event_type = type(event).__name__
+            print(f"\n[{event_type}]")
+            if hasattr(event, "model_dump_json"):
+                print(event.model_dump_json(indent=2))
+            elif hasattr(event, "__dict__"):
+                print(event.__dict__)
             else:
-                pass # skip empty events
+                print(event)
+            print("-" * 40)
     except Exception as e:
         print(f"\n[Error] The agent failed to run: {e}")
         print("Note: If you see a DefaultCredentialsError, you must authenticate via 'gcloud auth login --update-adc'.")

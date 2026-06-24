@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import os
+import sys
 from typing import List
 
 from pydantic import BaseModel, Field
@@ -22,15 +23,34 @@ from google.adk.agents import Agent
 from google.adk.apps import App
 from google.adk.models import Gemini
 from google.genai import types
+from google.adk.tools import MCPToolset
+from mcp.client.stdio import StdioServerParameters
 
 # Use AI Studio (API Key) instead of Vertex AI (ADC)
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "False"
 
 class IncidentAssessment(BaseModel):
     severity: str = Field(description="The severity of the incident.")
-    suspected_component: str = Field(description="The suspected component causing the issue.")
-    recommended_agent_routing: List[str] = Field(description="List of recommended agents to route to. Choose from: Log Agent, Network Agent, Security Agent, Infra Agent.")
-    immediate_action_required: bool = Field(description="Whether immediate action is required.")
+    suspected_component: str = Field(description="The suspected faulty component.")
+    recommended_agent_routing: List[str] = Field(description="List of agents to route to.")
+    immediate_action_required: bool = Field(description="Whether immediate action is needed.")
+
+infra_mcp_toolset = MCPToolset(
+    connection_params=StdioServerParameters(
+        command=sys.executable,
+        args=["infra_mcp_server.py"],
+    )
+)
+
+log_analyzer = Agent(
+    name="log_analyzer",
+    model=Gemini(
+        model="gemini-2.5-flash",
+        retry_options=types.HttpRetryOptions(attempts=3),
+    ),
+    instruction="You are a specialized Log Analyzer Agent. Use your tools to fetch and analyze logs and network latency.",
+    tools=[infra_mcp_toolset],
+)
 
 netsentinel_coordinator = Agent(
     name="netsentinel_coordinator",
@@ -38,8 +58,16 @@ netsentinel_coordinator = Agent(
         model="gemini-2.5-flash",
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
-    instruction="You are a lead Site Reliability Engineer for an infrastructure monitoring platform. When you receive an alert payload, analyze it and output a structured JSON response assessing the incident.",
-    output_schema=IncidentAssessment,
+    instruction="""You are a lead Site Reliability Engineer for an infrastructure monitoring platform.
+When you receive an alert payload, use your sub_agents to investigate it. After investigating, you MUST output a structured JSON response assessing the incident.
+The JSON must strictly follow this structure:
+{
+  "severity": "string",
+  "suspected_component": "string",
+  "recommended_agent_routing": ["list", "of", "agents"],
+  "immediate_action_required": true
+}""",
+    sub_agents=[log_analyzer], # Note: ADK uses sub_agents instead of can_handoff_to
 )
 
 app = App(
