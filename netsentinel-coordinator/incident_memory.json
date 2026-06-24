@@ -1,0 +1,10 @@
+{
+  "INC-00001": {
+    "symptom": "OOMKilled event on payment pod",
+    "resolution": "Increase memory limit allocation in Helm chart to 4Gi"
+  },
+  "INC-84730": {
+    "symptom": "504 Gateway Timeout: Upstream connection timed out in api-gateway for pod gateway-pod-123",
+    "resolution": "Investigate the health and connectivity of services upstream from `gateway-pod-123` in the `api-gateway` namespace, as `gateway-pod-123` appears to be running normally according to logs."
+  }
+}

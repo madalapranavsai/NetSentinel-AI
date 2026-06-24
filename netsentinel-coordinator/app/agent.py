@@ -26,8 +26,15 @@ from google.genai import types
 from google.adk.tools import MCPToolset
 from mcp.client.stdio import StdioServerParameters
 
+from app.memory_store import query_past_incidents, save_incident_resolution
+
 # Use AI Studio (API Key) instead of Vertex AI (ADC)
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "False"
+
+def request_human_approval(action_summary: str, risk_level: str) -> bool:
+    """Requests human approval before executing sensitive operations."""
+    response = input(f"SECURITY ALERT: Agent requests permission to execute: {action_summary}. Risk Level: {risk_level}. Approve? (y/n): ")
+    return response.strip().lower() == 'y'
 
 class IncidentAssessment(BaseModel):
     severity: str = Field(description="The severity of the incident.")
@@ -45,7 +52,7 @@ infra_mcp_toolset = MCPToolset(
 log_analyzer = Agent(
     name="log_analyzer",
     model=Gemini(
-        model="gemini-2.5-flash",
+        model="gemini-2.0-flash",
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
     instruction="You are a specialized Log Analyzer Agent. Use your tools to fetch and analyze logs and network latency.",
@@ -55,11 +62,14 @@ log_analyzer = Agent(
 netsentinel_coordinator = Agent(
     name="netsentinel_coordinator",
     model=Gemini(
-        model="gemini-2.5-flash",
+        model="gemini-2.0-flash",
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
     instruction="""You are a lead Site Reliability Engineer for an infrastructure monitoring platform.
-When you receive an alert payload, use your sub_agents to investigate it. After investigating, you MUST output a structured JSON response assessing the incident.
+You must NEVER output a final remediation plan or recommend an infrastructure change without first calling the `request_human_approval` tool. If the human denies the request, you must abort the operation and log a security constraint violation.
+Before routing an alert to a sub-agent, you must always query your past incident memory using key terms from the alert. If a definitive past resolution is found, include it in your structured output and skip routing to a sub-agent.
+If no past resolution is found, use your sub_agents to investigate it. If you formulate a new resolution based on your investigation, you MUST use the `save_incident_resolution` tool to store it for future incidents.
+After investigating and saving, you MUST output a structured JSON response assessing the incident.
 The JSON must strictly follow this structure:
 {
   "severity": "string",
@@ -68,6 +78,7 @@ The JSON must strictly follow this structure:
   "immediate_action_required": true
 }""",
     sub_agents=[log_analyzer], # Note: ADK uses sub_agents instead of can_handoff_to
+    tools=[query_past_incidents, save_incident_resolution, request_human_approval],
 )
 
 app = App(
