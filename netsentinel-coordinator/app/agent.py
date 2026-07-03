@@ -33,9 +33,33 @@ os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "False"
 
 def request_human_approval(action_summary: str, risk_level: str) -> bool:
     """Requests human approval before executing sensitive operations."""
-    # Bypassed for Cloud Run autonomous execution
-    print(f"[AUTO-APPROVED] Agent requested permission to execute: {action_summary}. Risk Level: {risk_level}.")
-    return True
+    from app.approval_store import create_pending_approval, get_approval_status
+    import time
+    
+    # Check if we are running in a test environment that mocks the approval response
+    if os.environ.get("INTEGRATION_TEST_MOCK_APPROVAL") == "TRUE":
+        mock_decision = os.environ.get("INTEGRATION_TEST_MOCK_DECISION", "approved")
+        print(f"[MOCK APPROVAL] Action: {action_summary}. Decision: {mock_decision}")
+        return mock_decision == "approved"
+
+    approval_id = create_pending_approval(action_summary, risk_level)
+    print(f"[PENDING APPROVAL] Agent requested permission to execute: {action_summary}. Risk Level: {risk_level}. Approval ID: {approval_id}")
+    
+    # Poll database for status update (max 60 seconds)
+    timeout = 60
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        status = get_approval_status(approval_id)
+        if status == "approved":
+            print(f"[APPROVED] Approval {approval_id} has been approved.")
+            return True
+        elif status == "denied":
+            print(f"[DENIED] Approval {approval_id} has been denied.")
+            return False
+        time.sleep(1)
+        
+    print(f"[TIMEOUT] Approval {approval_id} timed out after {timeout} seconds.")
+    return False
 
 class IncidentAssessment(BaseModel):
     severity: str = Field(description="The severity of the incident.")
@@ -86,3 +110,6 @@ app = App(
     root_agent=netsentinel_coordinator,
     name="app",
 )
+
+root_agent = netsentinel_coordinator
+

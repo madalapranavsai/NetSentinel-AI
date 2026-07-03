@@ -49,6 +49,21 @@ app: FastAPI = get_fast_api_app(
 app.title = "netsentinel-coordinator"
 app.description = "API for interacting with the Agent netsentinel-coordinator"
 
+from fastapi.responses import HTMLResponse
+from app.approval_endpoints import router as approval_router
+app.include_router(approval_router)
+
+@app.get("/dashboard", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse)
+def read_dashboard():
+    """Serve the approvals dashboard."""
+    frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "index.html")
+    if os.path.exists(frontend_path):
+        with open(frontend_path, "r") as f:
+            return f.read()
+    return "Dashboard HTML file not found."
+
+
 
 @app.post("/feedback")
 def collect_feedback(feedback: Feedback) -> dict[str, str]:

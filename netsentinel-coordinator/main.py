@@ -1,7 +1,10 @@
 import json
+import os
 from typing import Optional, Dict, Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from google.adk.runners import Runner
@@ -16,6 +19,28 @@ app = FastAPI(
     description="Multi-Agent Infrastructure Remediation API",
     version="1.0.0"
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+from app.approval_endpoints import router as approval_router
+app.include_router(approval_router)
+
+@app.get("/dashboard", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse)
+def read_dashboard():
+    """Serve the approvals dashboard."""
+    frontend_path = os.path.join(os.path.dirname(__file__), "frontend", "index.html")
+    if os.path.exists(frontend_path):
+        with open(frontend_path, "r") as f:
+            return f.read()
+    return "Dashboard HTML file not found."
+
 
 # 1. Define the Pydantic schema for the incoming alert payload
 class AlertPayload(BaseModel):
