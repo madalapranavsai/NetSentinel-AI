@@ -7,8 +7,8 @@
 # 1. Variables
 # Replace YOUR_PROJECT_ID with a Google Cloud Project that has an active Billing Account.
 # You can create a new project via the Google Cloud Console (https://console.cloud.google.com).
-PROJECT_ID="sincere-lexicon-485014-k1" 
-REGION="us-central1"
+PROJECT_ID="${GCP_PROJECT_ID:-"sincere-lexicon-485014-k1"}" 
+REGION="${GCP_REGION:-"us-central1"}"
 SERVICE_NAME="netsentinel-ai"
 
 # We use Google Artifact Registry to securely store the built container image

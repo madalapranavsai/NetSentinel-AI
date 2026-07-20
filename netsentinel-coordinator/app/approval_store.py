@@ -73,3 +73,16 @@ def get_approval_status(approval_id: str) -> Optional[str]:
     row = cursor.fetchone()
     conn.close()
     return row[0] if row else None
+
+def get_approval_history(limit: int = 50) -> List[Dict[str, Any]]:
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM approvals WHERE status != 'pending' ORDER BY COALESCE(decided_at, created_at) DESC LIMIT ?",
+        (limit,)
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+

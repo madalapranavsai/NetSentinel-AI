@@ -3,25 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NetSentinel AI - Pending Approvals</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>NetSentinel AI | Human-in-the-Loop Approval Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d0f14;
-            --card-bg: rgba(22, 28, 45, 0.4);
-            --card-border: rgba(255, 255, 255, 0.08);
+            --bg-color: #0b0f19;
+            --card-bg: rgba(23, 32, 54, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            --primary-glow: rgba(59, 130, 246, 0.15);
-            --success: #10b981;
-            --success-glow: rgba(16, 185, 129, 0.15);
-            --danger: #ef4444;
-            --danger-glow: rgba(239, 68, 68, 0.15);
-            --warning: #f59e0b;
-            --warning-glow: rgba(245, 158, 11, 0.15);
-            --transition-speed: 0.3s;
+            --glass-blur: 16px;
+            --transition-speed: 0.2s;
         }
 
         * {
@@ -31,221 +27,250 @@
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
             padding: 2rem 1rem;
         }
 
         .container {
             width: 100%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
+            max-width: 900px;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2.25rem;
+            font-size: 1.75rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: -0.025em;
         }
 
         .user-config {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.03);
             padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        .config-field {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .user-config label {
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             font-weight: 500;
         }
 
         .user-config input {
-            background: transparent;
-            border: none;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
             color: var(--text-primary);
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
             font-family: inherit;
             font-size: 0.875rem;
-            font-weight: 600;
             outline: none;
-            width: 100px;
-            border-bottom: 1px dashed var(--text-secondary);
+            transition: border-color var(--transition-speed);
         }
 
         .user-config input:focus {
-            border-bottom-color: #60a5fa;
+            border-color: var(--primary);
         }
 
         .stats {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
+            margin-bottom: 2rem;
         }
 
         .stat-card {
             background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border-color);
             padding: 1.25rem;
-            backdrop-filter: blur(12px);
+            border-radius: 16px;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
         }
 
         .stat-card .label {
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
         }
 
         .stat-card .value {
             font-size: 1.75rem;
             font-weight: 700;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .list-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .list-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .list-header h2 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
         }
 
         .status-badge {
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
             display: inline-flex;
             align-items: center;
             gap: 0.375rem;
-        }
-
-        .status-badge::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
         .status-badge.polling {
-            background: rgba(59, 130, 246, 0.15);
-            color: #60a5fa;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         .status-badge.polling::before {
-            background: #3b82f6;
-            animation: pulse 1.5s infinite;
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--success);
+            box-shadow: 0 0 8px var(--success);
         }
 
-        @keyframes pulse {
-            0% { transform: scale(0.85); opacity: 0.5; }
-            50% { transform: scale(1.15); opacity: 1; }
-            100% { transform: scale(0.85); opacity: 0.5; }
+        .status-badge.disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
-        .no-approvals {
-            background: var(--card-bg);
-            border: 1px dashed var(--card-border);
-            border-radius: 20px;
-            padding: 4rem 2rem;
+        /* Banner Alert */
+        #connection-banner {
+            display: none;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
             text-align: center;
-            color: var(--text-secondary);
-            font-size: 1.1rem;
+        }
+
+        /* Tabs and Controls */
+        .controls-bar {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            flex-wrap: wrap;
             gap: 1rem;
-            backdrop-filter: blur(12px);
         }
 
-        .no-approvals svg {
-            width: 48px;
-            height: 48px;
-            stroke: var(--text-secondary);
-            opacity: 0.6;
+        .tab-group {
+            display: flex;
+            gap: 0.5rem;
         }
 
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: #ffffff;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+
+        .filter-select {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        /* Cards */
         .approval-card {
             background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
             padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            margin-bottom: 1.25rem;
             transition: transform var(--transition-speed), border-color var(--transition-speed);
             position: relative;
             overflow: hidden;
         }
 
         .approval-card:hover {
-            transform: translateY(-2px);
             border-color: rgba(255, 255, 255, 0.15);
         }
 
-        .approval-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
+        .approval-card.critical {
+            border-left: 4px solid var(--danger);
         }
 
-        .approval-card.high::before { background: var(--danger); }
-        .approval-card.medium::before { background: var(--warning); }
-        .approval-card.low::before { background: var(--success); }
+        .approval-card.high {
+            border-left: 4px solid var(--warning);
+        }
+
+        .approval-card.medium {
+            border-left: 4px solid var(--primary);
+        }
+
+        .approval-card.low {
+            border-left: 4px solid var(--success);
+        }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            margin-bottom: 1rem;
         }
 
         .card-meta {
@@ -255,52 +280,98 @@
         }
 
         .card-title {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
 
         .approval-id {
             font-family: monospace;
-            font-size: 0.75rem;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.125rem 0.375rem;
-            border-radius: 4px;
-            width: fit-content;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
         .risk-badge {
+            padding: 0.25rem 0.625rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .risk-badge.critical {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .risk-badge.high {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .risk-badge.medium {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .risk-badge.low {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge-resolved {
+            padding: 0.25rem 0.625rem;
+            border-radius: 6px;
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
-            padding: 0.25rem 0.75rem;
-            border-radius: 6px;
-            letter-spacing: 0.05em;
         }
 
-        .risk-badge.high { background: var(--danger-glow); color: #f87171; }
-        .risk-badge.medium { background: var(--warning-glow); color: #fbbf24; }
-        .risk-badge.low { background: var(--success-glow); color: #34d399; }
+        .status-badge-resolved.approved {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .status-badge-resolved.denied {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
 
         .card-body {
-            font-size: 1.05rem;
-            line-height: 1.5;
+            font-size: 0.95rem;
+            line-height: 1.6;
             color: #e2e8f0;
-            font-weight: 500;
+            margin-bottom: 1.25rem;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
 
         .card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 1rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
         }
 
         .timestamp {
             font-size: 0.8rem;
             color: var(--text-secondary);
+        }
+
+        .expiry-timer {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #fbbf24;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
         }
 
         .actions {
@@ -351,6 +422,48 @@
             box-shadow: none !important;
         }
 
+        .no-approvals {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px dashed var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .no-approvals svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-card {
+            background: #111827;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            max-width: 500px;
+            width: 100%;
+            padding: 1.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
         @media (max-width: 640px) {
             header {
                 flex-direction: column;
@@ -359,7 +472,8 @@
             }
             .user-config {
                 align-self: stretch;
-                justify-content: space-between;
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -369,13 +483,23 @@
         <header>
             <div>
                 <h1>NetSentinel Coordinator</h1>
-                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">Human-in-the-Loop Approval Console</p>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">Human-in-the-Loop Approval & Audit Console</p>
             </div>
             <div class="user-config">
-                <label for="decidedBy">Operator:</label>
-                <input type="text" id="decidedBy" value="admin">
+                <div class="config-field">
+                    <label for="decidedBy">Operator ID:</label>
+                    <input type="text" id="decidedBy" value="sre-operator">
+                </div>
+                <div class="config-field">
+                    <label for="apiKey">API Key:</label>
+                    <input type="password" id="apiKey" placeholder="X-API-Key Header">
+                </div>
             </div>
         </header>
+
+        <div id="connection-banner">
+            ⚠️ Disconnected: Backend API is currently unreachable. Displaying cached dashboard state.
+        </div>
 
         <section class="stats">
             <div class="stat-card">
@@ -383,117 +507,225 @@
                 <span class="value" id="pending-count">0</span>
             </div>
             <div class="stat-card">
-                <span class="label">Status</span>
+                <span class="label">Backend Status</span>
                 <div style="display: flex; align-items: center; margin-top: auto;">
-                    <span class="status-badge polling">Live Monitoring</span>
+                    <span class="status-badge polling" id="system-status">Live Monitoring</span>
                 </div>
             </div>
         </section>
 
-        <section class="list-container">
-            <div class="list-header">
-                <h2>Pending Actions</h2>
+        <div class="controls-bar">
+            <div class="tab-group">
+                <button class="tab-btn active" id="tab-pending" onclick="switchTab('pending')">Pending Approvals</button>
+                <button class="tab-btn" id="tab-history" onclick="switchTab('history')">Audit History</button>
             </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">Risk Filter:</span>
+                <select id="risk-filter" class="filter-select" onchange="renderCurrentView()">
+                    <option value="ALL">All Risk Levels</option>
+                    <option value="CRITICAL_HIGH">Critical & High Only</option>
+                    <option value="MEDIUM">Medium Only</option>
+                    <option value="LOW">Low Only</option>
+                </select>
+            </div>
+        </div>
+
+        <section class="list-container">
             <div id="approvals-list">
                 <!-- Dynamic cards insertion -->
                 <div class="no-approvals">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                    </svg>
-                    <p>All clear! No operations are currently awaiting human approval.</p>
+                    <p>Loading approvals...</p>
                 </div>
             </div>
         </section>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <h3 id="modal-title" style="color: #ef4444; font-size: 1.2rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                ⚠️ High-Risk Action Confirmation
+            </h3>
+            <div id="modal-body" style="font-size: 0.95rem; color: #e2e8f0; margin-bottom: 1rem; line-height: 1.5; background: rgba(15, 23, 42, 0.6); padding: 1rem; border-radius: 8px;"></div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                This remediation operation will directly modify live infrastructure. Confirm that you intend to proceed with this decision.
+            </p>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button class="btn btn-deny" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn btn-approve" id="modal-confirm-btn">Confirm Execution</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_BASE = window.location.origin;
-        let lastApprovals = [];
+        let currentTab = 'pending';
+        let pendingApprovals = [];
+        let historyApprovals = [];
+        let pendingConfirmAction = null;
 
-        async function fetchPendingApprovals() {
-            try {
-                const response = await fetch(`${API_BASE}/approvals/pending`);
-                if (!response.ok) throw new Error("Failed to fetch pending approvals");
-                const approvals = await response.json();
-                
-                updateApprovalsList(approvals);
-            } catch (err) {
-                console.error("Error polling approvals:", err);
+        // Restore API Key from localStorage
+        const apiKeyInput = document.getElementById("apiKey");
+        if (localStorage.getItem("netsentinel_api_key")) {
+            apiKeyInput.value = localStorage.getItem("netsentinel_api_key");
+        }
+        apiKeyInput.addEventListener("input", (e) => {
+            localStorage.setItem("netsentinel_api_key", e.target.value);
+        });
+
+        function getAuthHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            const key = apiKeyInput.value.trim();
+            if (key) {
+                headers['X-API-Key'] = key;
             }
+            return headers;
         }
 
-        async function decideApproval(approvalId, decision) {
-            const decidedBy = document.getElementById("decidedBy").value || "admin";
-            const btnApprove = document.getElementById(`btn-approve-${approvalId}`);
-            const btnDeny = document.getElementById(`btn-deny-${approvalId}`);
-            
-            if (btnApprove) btnApprove.disabled = true;
-            if (btnDeny) btnDeny.disabled = true;
-
-            try {
-                const response = await fetch(`${API_BASE}/approvals/${approvalId}/decide`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ decision, decided_by: decidedBy })
-                });
-
-                if (!response.ok) throw new Error("Failed to submit decision");
-                
-                // Immediately fetch updated list
-                await fetchPendingApprovals();
-            } catch (err) {
-                alert(`Error: ${err.message}`);
-                if (btnApprove) btnApprove.disabled = false;
-                if (btnDeny) btnDeny.disabled = false;
-            }
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
 
         function formatTimestamp(isoString) {
-            if (!isoString) return '';
+            if (!isoString) return 'N/A';
             const date = new Date(isoString);
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' ' + date.toLocaleDateString();
         }
 
-        function updateApprovalsList(approvals) {
-            const listDiv = document.getElementById("approvals-list");
-            document.getElementById("pending-count").innerText = approvals.length;
+        function getRemainingSeconds(createdAtIso) {
+            if (!createdAtIso) return 60;
+            const created = new Date(createdAtIso).getTime();
+            const now = new Date().getTime();
+            const elapsed = Math.floor((now - created) / 1000);
+            const remaining = 60 - elapsed;
+            return remaining > 0 ? remaining : 0;
+        }
 
-            if (approvals.length === 0) {
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById("tab-pending").classList.toggle("active", tab === 'pending');
+            document.getElementById("tab-history").classList.toggle("active", tab === 'history');
+            
+            if (tab === 'history') {
+                fetchAuditHistory();
+            } else {
+                fetchPendingApprovals();
+            }
+        }
+
+        function setConnectionStatus(online) {
+            const banner = document.getElementById("connection-banner");
+            const badge = document.getElementById("system-status");
+            if (online) {
+                banner.style.display = "none";
+                badge.className = "status-badge polling";
+                badge.innerText = "Live Monitoring";
+            } else {
+                banner.style.display = "block";
+                badge.className = "status-badge disconnected";
+                badge.innerText = "Disconnected";
+            }
+        }
+
+        async function fetchPendingApprovals() {
+            try {
+                const response = await fetch(`${API_BASE}/approvals/pending`, { headers: getAuthHeaders() });
+                if (!response.ok) throw new Error("Failed to fetch pending approvals");
+                pendingApprovals = await response.json();
+                setConnectionStatus(true);
+                if (currentTab === 'pending') renderCurrentView();
+            } catch (err) {
+                console.error("Error polling pending approvals:", err);
+                setConnectionStatus(false);
+            }
+        }
+
+        async function fetchAuditHistory() {
+            try {
+                const response = await fetch(`${API_BASE}/approvals/history?limit=50`, { headers: getAuthHeaders() });
+                if (!response.ok) throw new Error("Failed to fetch audit history");
+                historyApprovals = await response.json();
+                setConnectionStatus(true);
+                if (currentTab === 'history') renderCurrentView();
+            } catch (err) {
+                console.error("Error fetching history:", err);
+                setConnectionStatus(false);
+            }
+        }
+
+        function filterByRisk(items) {
+            const filterVal = document.getElementById("risk-filter").value;
+            if (filterVal === "CRITICAL_HIGH") {
+                return items.filter(i => (i.risk_level || '').toUpperCase() === 'CRITICAL' || (i.risk_level || '').toUpperCase() === 'HIGH');
+            } else if (filterVal === "MEDIUM") {
+                return items.filter(i => (i.risk_level || '').toUpperCase() === 'MEDIUM');
+            } else if (filterVal === "LOW") {
+                return items.filter(i => (i.risk_level || '').toUpperCase() === 'LOW');
+            }
+            return items;
+        }
+
+        function renderCurrentView() {
+            if (currentTab === 'pending') {
+                renderPendingView();
+            } else {
+                renderHistoryView();
+            }
+        }
+
+        function renderPendingView() {
+            const listDiv = document.getElementById("approvals-list");
+            document.getElementById("pending-count").innerText = pendingApprovals.length;
+            const filtered = filterByRisk(pendingApprovals);
+
+            if (filtered.length === 0) {
                 listDiv.innerHTML = `
                     <div class="no-approvals">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                         </svg>
-                        <p>All clear! No operations are currently awaiting human approval.</p>
+                        <p>All clear! No pending operations match your criteria.</p>
                     </div>
                 `;
                 return;
             }
 
-            // Create cards HTML
             let html = '<div style="display: flex; flex-direction: column; gap: 1.25rem;">';
-            approvals.forEach(appr => {
-                const riskClass = appr.risk_level ? appr.risk_level.toLowerCase() : 'low';
+            filtered.forEach(appr => {
+                const riskUpper = (appr.risk_level || 'LOW').toUpperCase();
+                const riskClass = riskUpper.toLowerCase();
+                const safeId = escapeHtml(appr.approval_id);
+                const safeSummary = escapeHtml(appr.action_summary);
+                const safeIncident = appr.incident_id ? escapeHtml(appr.incident_id) : '';
+                const remainingSec = getRemainingSeconds(appr.created_at);
+
                 html += `
-                    <div class="approval-card ${riskClass}" id="card-${appr.approval_id}">
+                    <div class="approval-card ${riskClass}" id="card-${safeId}">
                         <div class="card-header">
                             <div class="card-meta">
                                 <span class="card-title">Pending Action</span>
-                                <span class="approval-id">ID: ${appr.approval_id}</span>
-                                ${appr.incident_id ? `<span class="timestamp" style="font-family: monospace; margin-top: 2px;">Incident: ${appr.incident_id}</span>` : ''}
+                                <span class="approval-id">ID: ${safeId}</span>
+                                ${safeIncident ? `<span class="timestamp" style="font-family: monospace;">Incident: ${safeIncident}</span>` : ''}
                             </div>
-                            <span class="risk-badge ${riskClass}">${appr.risk_level || 'LOW'}</span>
+                            <span class="risk-badge ${riskClass}">${riskUpper}</span>
                         </div>
                         <div class="card-body">
-                            ${appr.action_summary}
+                            ${safeSummary}
                         </div>
                         <div class="card-footer">
-                            <span class="timestamp">Requested: ${formatTimestamp(appr.created_at)}</span>
+                            <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+                                <span class="timestamp">Requested: ${formatTimestamp(appr.created_at)}</span>
+                                <span class="expiry-timer">⏳ Expiring in ${remainingSec}s</span>
+                            </div>
                             <div class="actions">
-                                <button class="btn btn-deny" id="btn-deny-${appr.approval_id}" onclick="decideApproval('${appr.approval_id}', 'deny')">Deny</button>
-                                <button class="btn btn-approve" id="btn-approve-${appr.approval_id}" onclick="decideApproval('${appr.approval_id}', 'approve')">Approve</button>
+                                <button class="btn btn-deny" id="btn-deny-${safeId}" onclick="handleDecision('${safeId}', 'deny', '${riskUpper}')">Deny</button>
+                                <button class="btn btn-approve" id="btn-approve-${safeId}" onclick="handleDecision('${safeId}', 'approve', '${riskUpper}')">Approve</button>
                             </div>
                         </div>
                     </div>
@@ -503,9 +735,129 @@
             listDiv.innerHTML = html;
         }
 
-        // Start polling
+        function renderHistoryView() {
+            const listDiv = document.getElementById("approvals-list");
+            const filtered = filterByRisk(historyApprovals);
+
+            if (filtered.length === 0) {
+                listDiv.innerHTML = `
+                    <div class="no-approvals">
+                        <p>No audit history records found.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div style="display: flex; flex-direction: column; gap: 1.25rem;">';
+            filtered.forEach(appr => {
+                const riskUpper = (appr.risk_level || 'LOW').toUpperCase();
+                const riskClass = riskUpper.toLowerCase();
+                const statusUpper = (appr.status || 'RESOLVED').toUpperCase();
+                const statusClass = statusUpper === 'APPROVED' ? 'approved' : 'denied';
+                const safeId = escapeHtml(appr.approval_id);
+                const safeSummary = escapeHtml(appr.action_summary);
+                const safeOperator = escapeHtml(appr.decided_by || 'system');
+
+                html += `
+                    <div class="approval-card ${riskClass}" style="opacity: 0.95;">
+                        <div class="card-header">
+                            <div class="card-meta">
+                                <span class="card-title" style="font-size: 1rem;">Action Record</span>
+                                <span class="approval-id">ID: ${safeId}</span>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <span class="risk-badge ${riskClass}">${riskUpper}</span>
+                                <span class="status-badge-resolved ${statusClass}">${statusUpper}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            ${safeSummary}
+                        </div>
+                        <div class="card-footer">
+                            <span class="timestamp">Resolved at: ${formatTimestamp(appr.decided_at || appr.created_at)}</span>
+                            <span class="timestamp" style="font-weight: 600;">Decided by: ${safeOperator}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            listDiv.innerHTML = html;
+        }
+
+        function handleDecision(approvalId, decision, riskLevel) {
+            if (riskLevel === 'HIGH' || riskLevel === 'CRITICAL') {
+                openConfirmModal(approvalId, decision, riskLevel);
+            } else {
+                executeDecision(approvalId, decision);
+            }
+        }
+
+        function openConfirmModal(approvalId, decision, riskLevel) {
+            const card = pendingApprovals.find(a => a.approval_id === approvalId);
+            const summary = card ? escapeHtml(card.action_summary) : '';
+            
+            document.getElementById("modal-body").innerHTML = `
+                <strong>Action (${decision.toUpperCase()}):</strong> ${summary}<br>
+                <span style="color: #fbbf24; font-size: 0.85rem; margin-top: 0.5rem; display: inline-block;">Risk Level: ${riskLevel}</span>
+            `;
+            
+            const confirmBtn = document.getElementById("modal-confirm-btn");
+            confirmBtn.className = decision === 'approve' ? 'btn btn-approve' : 'btn btn-deny';
+            confirmBtn.innerText = `Confirm ${decision.toUpperCase()}`;
+            confirmBtn.onclick = () => {
+                closeConfirmModal();
+                executeDecision(approvalId, decision);
+            };
+
+            document.getElementById("confirm-modal").style.display = "flex";
+        }
+
+        function closeConfirmModal() {
+            document.getElementById("confirm-modal").style.display = "none";
+        }
+
+        async function executeDecision(approvalId, decision) {
+            const decidedBy = document.getElementById("decidedBy").value || "sre-operator";
+            const btnApprove = document.getElementById(`btn-approve-${approvalId}`);
+            const btnDeny = document.getElementById(`btn-deny-${approvalId}`);
+            
+            if (btnApprove) btnApprove.disabled = true;
+            if (btnDeny) btnDeny.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/approvals/${approvalId}/decide`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ decision, decided_by: decidedBy })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    alert(`Failed to resolve approval: ${errData.detail || response.statusText}`);
+                }
+                
+                // Refresh data
+                await fetchPendingApprovals();
+                if (currentTab === 'history') fetchAuditHistory();
+            } catch (err) {
+                console.error("Error submitting decision:", err);
+                alert("Network error: Could not contact backend server.");
+            }
+        }
+
+        // Start polling loop
         fetchPendingApprovals();
-        setInterval(fetchPendingApprovals, 3000);
+        setInterval(() => {
+            if (currentTab === 'pending') fetchPendingApprovals();
+            else fetchAuditHistory();
+        }, 3000);
+
+        // Update timers every second
+        setInterval(() => {
+            if (currentTab === 'pending' && pendingApprovals.length > 0) {
+                renderPendingView();
+            }
+        }, 1000);
     </script>
 </body>
 </html>

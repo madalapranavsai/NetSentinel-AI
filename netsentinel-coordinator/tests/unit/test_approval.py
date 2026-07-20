@@ -109,3 +109,59 @@ def test_request_human_approval_timeout(monkeypatch):
     
     result = request_human_approval("Restart database service", "HIGH")
     assert result is False
+
+def test_approval_endpoint_api_key_auth(monkeypatch):
+    from fastapi.testclient import TestClient
+    from main import app
+    
+    client = TestClient(app)
+    app_id = create_pending_approval("Restart app", "LOW")
+    
+    # 1. Without API key configured, request succeeds
+    monkeypatch.delenv("APPROVAL_API_KEY", raising=False)
+    resp = client.post(f"/approvals/{app_id}/decide", json={"decision": "approve", "decided_by": "op"})
+    assert resp.status_code == 200
+
+    # 2. With APPROVAL_API_KEY configured, request without X-API-Key fails (401)
+    app_id2 = create_pending_approval("Restart database", "HIGH")
+    monkeypatch.setenv("APPROVAL_API_KEY", "secret-key-123")
+    resp_unauth = client.post(f"/approvals/{app_id2}/decide", json={"decision": "approve", "decided_by": "op"})
+    assert resp_unauth.status_code == 401
+    assert "Unauthorized" in resp_unauth.json()["detail"]
+
+    # 3. With APPROVAL_API_KEY configured, request with valid X-API-Key succeeds
+    resp_auth = client.post(
+        f"/approvals/{app_id2}/decide",
+        json={"decision": "approve", "decided_by": "op"},
+        headers={"X-API-Key": "secret-key-123"}
+    )
+    assert resp_auth.status_code == 200
+
+def test_get_approval_history():
+    from app.approval_store import get_approval_history
+    from fastapi.testclient import TestClient
+    from main import app
+
+    client = TestClient(app)
+    
+    # 1. Create and resolve approvals
+    app_id1 = create_pending_approval("Flush redis cache", "LOW")
+    app_id2 = create_pending_approval("Scale k8s cluster", "HIGH")
+    
+    resolve_approval(app_id1, "approve", "sre-alice")
+    resolve_approval(app_id2, "deny", "sre-bob")
+
+    # 2. Query store function directly
+    history = get_approval_history(limit=10)
+    assert len(history) >= 2
+    statuses = [item["status"] for item in history]
+    assert "approved" in statuses
+    assert "denied" in statuses
+
+    # 3. Test HTTP endpoint GET /approvals/history
+    resp = client.get("/approvals/history")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) >= 2
+
+
