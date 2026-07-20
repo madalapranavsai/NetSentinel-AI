@@ -29,4 +29,4 @@ COPY incident_memory.json .
 EXPOSE 8080
 
 # Run the FastAPI web server
-CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["sh", "-c", "echo $GCP_CREDENTIALS_JSON > /tmp/gcp-credentials.json && uv run uvicorn main:app --host 0.0.0.0 --port 8080"]
