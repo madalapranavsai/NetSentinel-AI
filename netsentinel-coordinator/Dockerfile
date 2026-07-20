@@ -19,7 +19,7 @@ RUN uv sync
 
 # Copy application code
 COPY app/ ./app/
-COPY frontend/ ./app/frontend/
+COPY frontend/ ./frontend/
 COPY infra_mcp_server.py .
 COPY core_test.py .
 COPY main.py .
